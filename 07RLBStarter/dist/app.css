@@ -1,21 +1,3 @@
-Skip to content
-This repository
-Search
-Pull requests
-Issues
-Gist
- @startaper
- Sign out
- Watch 3
-  Star 36
- Fork 12 knowthen/elm-beyond-basics
- Code  Issues 1  Pull requests 0  Projects 0  Wiki  Pulse  Graphs
-Branch: master Find file Copy pathelm-beyond-basics/07RLBStarter/dist/app.css
-90e816c  on 28 Nov 2016
-@knowthen knowthen include some dist at 0.18
-1 contributor
-RawBlameHistory
-46 lines (45 sloc)  46.6 KB
 /*!
 Pure v0.6.0
 Copyright 2014 Yahoo! Inc. All rights reserved.
@@ -61,5 +43,3 @@ Licensed under the BSD License.
 https://github.com/yahoo/pure/blob/master/LICENSE.md
 */.pure-table,table{border-collapse:collapse;border-spacing:0;empty-cells:show;border:1px solid #cbcbcb}.pure-table caption,table caption{color:#000;font:italic 85%/1 arial, sans-serif;padding:1em 0;text-align:center}.pure-table td,table td,.pure-table th,table th{border-left:1px solid #cbcbcb;border-width:0 0 0 1px;font-size:inherit;margin:0;overflow:visible;padding:0.5em 1em}.pure-table td:first-child,table td:first-child,.pure-table th:first-child,table th:first-child{border-left-width:0}.pure-table thead,table thead{background-color:#e0e0e0;color:#000;text-align:left;vertical-align:bottom}.pure-table td,table td{background-color:transparent}.pure-table-odd td,.pure-table-striped tr:nth-child(2n-1) td{background-color:#f2f2f2}.pure-table-bordered td{border-bottom:1px solid #cbcbcb}.pure-table-bordered tbody>tr:last-child>td{border-bottom-width:0}.pure-table-horizontal td,table td,.pure-table-horizontal th,table th{border-width:0 0 1px 0;border-bottom:1px solid #cbcbcb}.pure-table-horizontal tbody>tr:last-child>td,table tbody>tr:last-child>td{border-bottom-width:0}header{padding:.8em;background:#2d3e50}header>a:first-child{color:#fff;font-size:120%}header>a:first-child:hover{background:#2d3e50}header>a:first-child:focus,header>a:focus,header>ul>li>a:focus{background-color:inherit}header>ul:last-child{float:right}header>ul>li>a{font-size:18px;color:#6FBEF3}header>ul>li>a:hover{background-color:#496685}header>ul>li.active>a{color:#fff}.main{margin:8px 10% 0 10%}table{width:100%}form{margin:8px 0 8px 0}form>button{background-color:#1f8dd6;width:19%;float:right}form.add-runner{margin:20px 20% 0 20%}form.add-runner>fieldset>legend{font-size:20px}form.add-runner>fieldset>div>label{text-align:right;display:inline-block;vertical-align:middle;width:10em;margin:0 1em 0 0}form>fieldset>div>span{color:#a94442;font-style:italic;margin-left:4px}div.error{color:#a94442;background-color:#f2dede;border-color:#ebccd1;padding:15px}div.error>button{cursor:pointer;display:block;float:right;height:21px;min-height:0px;opacity:.2;position:relative;top:-2px;width:12.6094px;z-index:0;perspective-origin:6.29688px 10.5px;transform-origin:6.29688px 10.5px;background:transparent none repeat scroll 0px 0px/auto padding-box border-box;padding:0px;box-sizing:border-box;color:#8a6d3b;cursor:pointer;text-align:center;text-shadow:#fff 0px 1px 0px;column-rule-color:#8a6d3b;align-self:flex-start;border:0px none #8a6d3b;font:normal normal bold normal 21px/21px "Helvetica Neue",Helvetica,Arial,sans-serif}a{cursor:pointer}
 /*# sourceMappingURL=app.css.map */
-Contact GitHub API Training Shop Blog About
-© 2017 GitHub, Inc. Terms Privacy Security Status Help
