@@ -91,7 +91,7 @@ errorPanel error =
         Just msg ->
             div [ class "error" ]
                 [ text msg
-                , button [ type_ "button" ] [ text "x" ]
+                , button [ type_ "button" ] [ text "×" ]
                 ]
 
 
@@ -100,7 +100,7 @@ searchForm query =
     Html.form [ onSubmit Search ]
         [ input
             [ type_ "text"
-            , placeholder "Search for runners..."
+            , placeholder "Search for runner..."
             , value query
             , onInput SearchInput
             ]
@@ -126,7 +126,8 @@ runner { name, location, age, bib, estimatedDistance } =
         , td [] [ text (toString age) ]
         , td [] [ text (toString bib) ]
         , td []
-            [ text "1 mi @ 08:30AM (TODO)" ]
+            [ text "1 mi @ 08:30AM (TODO)"
+            ]
         , td [] [ text (toString estimatedDistance) ]
         ]
 

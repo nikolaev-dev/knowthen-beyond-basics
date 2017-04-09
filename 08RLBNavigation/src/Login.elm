@@ -91,8 +91,9 @@ loginForm model =
                     []
                 ]
             , div []
-                [ label [] [] ]
-            , button [ type_ "submit" ] [ text "Login" ]
+                [ label [] []
+                , button [ type_ "submit" ] [ text "Login" ]
+                ]
             ]
         ]
 
@@ -104,11 +105,8 @@ errorPanel error =
             text ""
 
         Just msg ->
-            div [ class "error" ] [ text msg ]
-
-
-
--- subscriptions
+            div [ class "error" ]
+                [ text msg ]
 
 
 subscriptions : Model -> Sub Msg

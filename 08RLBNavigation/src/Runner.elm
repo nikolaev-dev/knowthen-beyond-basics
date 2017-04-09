@@ -44,7 +44,7 @@ init =
 
 
 
--- udpate
+-- update
 
 
 type Msg

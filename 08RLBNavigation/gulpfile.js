@@ -20,7 +20,7 @@ gulp.task('server', function(done) {
   gutil.log(gutil.colors.blue('Starting server at http://localhost:4000'));
   http.createServer(
     st({
-      path: __dirname,
+      path: __dirname + '/dist/',
       index: 'index.html',
       cache: false
     })
