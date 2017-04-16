@@ -6,6 +6,7 @@ import Html.Events exposing (..)
 import Navigation
 import LeaderBoard
 import Runner
+import Login
 
 
 -- model
@@ -15,6 +16,7 @@ type alias Model =
     { page : Page
     , leaderBoard : LeaderBoard.Model
     , runner : Runner.Model
+    , login : Login.Model
     }
 
 
@@ -22,6 +24,7 @@ type Page
     = NotFound
     | LeaderBoardPage
     | RunnerPage
+    | LoginPage
 
 
 init : Navigation.Location -> ( Model, Cmd Msg )
@@ -36,10 +39,14 @@ init location =
         ( runnerInitModel, runnerCmd ) =
             Runner.init
 
+        ( loginInitModel, loginCmd ) =
+            Login.init
+
         initModel =
             { page = page
             , leaderBoard = leaderboardInitModel
             , runner = runnerInitModel
+            , login = loginInitModel
             }
 
         cmds =
@@ -58,6 +65,7 @@ type Msg
     | ChangePage Page
     | LeaderBoardMsg LeaderBoard.Msg
     | RunnerMsg Runner.Msg
+    | LoginMsg Login.Msg
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -87,6 +95,15 @@ update msg model =
                 , Cmd.map RunnerMsg cmd
                 )
 
+        LoginMsg msg ->
+            let
+                ( loginModel, cmd ) =
+                    Login.update msg model.login
+            in
+                ( { model | login = loginModel }
+                , Cmd.map LoginMsg cmd
+                )
+
 
 
 -- view
@@ -104,6 +121,10 @@ view model =
                 RunnerPage ->
                     Html.map RunnerMsg
                         (Runner.view model.runner)
+
+                LoginPage ->
+                    Html.map LoginMsg
+                        (Login.view model.login)
 
                 NotFound ->
                     div [ class "main" ]
@@ -123,12 +144,12 @@ pageHeader model =
         [ a [ href "#/" ] [ text "Race Results" ]
         , ul []
             [ li []
-                [ a [ href "#" ] [ text "Link" ]
+                [ a [ href "#/runner" ] [ text "Add runner" ]
                 ]
             ]
         , ul []
             [ li []
-                [ a [ href "#" ] [ text "Login" ]
+                [ a [ href "#/login" ] [ text "Login" ]
                 ]
             ]
         ]
@@ -160,6 +181,9 @@ hashToPage hash =
         "#/runner" ->
             RunnerPage
 
+        "#/login" ->
+            LoginPage
+
         _ ->
             NotFound
 
@@ -172,6 +196,9 @@ pageToHash page =
 
         RunnerPage ->
             "#/runner"
+
+        LoginPage ->
+            "#/login"
 
         NotFound ->
             "#notfound"
