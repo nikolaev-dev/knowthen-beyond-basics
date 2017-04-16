@@ -5,6 +5,7 @@ import Html.Attributes exposing (..)
 import Html.Events exposing (..)
 import Navigation
 import LeaderBoard
+import Runner
 
 
 -- model
@@ -13,12 +14,14 @@ import LeaderBoard
 type alias Model =
     { page : Page
     , leaderBoard : LeaderBoard.Model
+    , runner : Runner.Model
     }
 
 
 type Page
     = NotFound
     | LeaderBoardPage
+    | RunnerPage
 
 
 init : Navigation.Location -> ( Model, Cmd Msg )
@@ -30,9 +33,13 @@ init location =
         ( leaderboardInitModel, leaderboardCmd ) =
             LeaderBoard.init
 
+        ( runnerInitModel, runnerCmd ) =
+            Runner.init
+
         initModel =
             { page = page
             , leaderBoard = leaderboardInitModel
+            , runner = runnerInitModel
             }
 
         cmds =
@@ -50,6 +57,7 @@ type Msg
     = Navigate Page
     | ChangePage Page
     | LeaderBoardMsg LeaderBoard.Msg
+    | RunnerMsg Runner.Msg
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -70,6 +78,15 @@ update msg model =
                 , Cmd.map LeaderBoardMsg cmd
                 )
 
+        RunnerMsg msg ->
+            let
+                ( runnerModel, cmd ) =
+                    Runner.update msg model.runner
+            in
+                ( { model | runner = runnerModel }
+                , Cmd.map RunnerMsg cmd
+                )
+
 
 
 -- view
@@ -83,6 +100,10 @@ view model =
                 LeaderBoardPage ->
                     Html.map LeaderBoardMsg
                         (LeaderBoard.view model.leaderBoard)
+
+                RunnerPage ->
+                    Html.map RunnerMsg
+                        (Runner.view model.runner)
 
                 NotFound ->
                     div [ class "main" ]
@@ -136,6 +157,9 @@ hashToPage hash =
         "" ->
             LeaderBoardPage
 
+        "#/runner" ->
+            RunnerPage
+
         _ ->
             NotFound
 
@@ -145,6 +169,9 @@ pageToHash page =
     case page of
         LeaderBoardPage ->
             "#/"
+
+        RunnerPage ->
+            "#/runner"
 
         NotFound ->
             "#notfound"
