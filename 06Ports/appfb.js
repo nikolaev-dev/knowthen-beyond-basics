@@ -1,8 +1,8 @@
 'use strict';
 var config = {
   apiKey: "AIzaSyDI5ZoZyo8vf1Tvu0jnTSSe7qHzu4CqmpY",
-  authDomain: "YOURAUTHDOMAINHERE",
-  databaseURL: "firebase.google.com/project/elmports-6dcf3",
+  authDomain: "elmports",
+  databaseURL: "https://elmports-6dcf3.firebaseio.com",
   storageBucket: "",
 };
 
