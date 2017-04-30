@@ -3,6 +3,10 @@ module Login exposing (..)
 import Html exposing (..)
 import Html.Events exposing (..)
 import Html.Attributes exposing (..)
+import Http
+import Json.Encode as JE
+import Json.Decode as JD exposing (field)
+import Navigation
 
 
 -- model
@@ -37,22 +41,66 @@ type Msg
     | PasswordInput String
     | Submit
     | Error String
+    | LoginResponse (Result Http.Error String)
 
 
-update : Msg -> Model -> ( Model, Cmd Msg )
+url : String
+url =
+    "http://localhost:5000/authenticate"
+
+
+update : Msg -> Model -> ( Model, Cmd Msg, Maybe String )
 update msg model =
     case msg of
         UsernameInput username ->
-            ( { model | username = username }, Cmd.none )
+            ( { model | username = username }, Cmd.none, Nothing )
 
         PasswordInput password ->
-            ( { model | password = password }, Cmd.none )
+            ( { model | password = password }, Cmd.none, Nothing )
 
         Submit ->
-            ( model, Cmd.none )
+            let
+                body =
+                    JE.object
+                        [ ( "username", JE.string model.username )
+                        , ( "password", JE.string model.password )
+                        ]
+                        |> JE.encode 4
+                        |> Http.stringBody "application/json"
+
+                request =
+                    Http.post url body decoder
+
+                decoder =
+                    field "token" JD.string
+
+                cmd =
+                    Http.send LoginResponse request
+            in
+                ( model, cmd, Nothing )
 
         Error error ->
-            ( { model | error = Just error }, Cmd.none )
+            ( { model | error = Just error }, Cmd.none, Nothing )
+
+        LoginResponse (Ok token) ->
+            ( initModel, Navigation.newUrl "#/", Just token )
+
+        LoginResponse (Err err) ->
+            let
+                errMsg =
+                    case err of
+                        Http.BadStatus resp ->
+                            case resp.status.code of
+                                401 ->
+                                    resp.body
+
+                                _ ->
+                                    resp.status.message
+
+                        _ ->
+                            "Login Error"
+            in
+                ( { model | error = Just errMsg }, Cmd.none, Nothing )
 
 
 
