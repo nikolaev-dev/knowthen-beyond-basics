@@ -13,7 +13,18 @@
 
   <script src="bundle.js"></script>
   <script>
-    var app = Elm.Main.fullscreen();
+
+    vat TOKEN_KEY = 'token';
+    var token = localStorage.getItem(TOKEN_KEY);
+    var app = Elm.Main.fullscreen({token: token});
+    app.ports.saveToken.subscribe( function(token){
+      localStorage.setItem(TOKEN_KEY, token);
+    })
+    app.ports.deleteToken.subscribe(fuction(){
+      localStorage.removeItem(TOKEN_KEY);
+    });
+
+
   </script>
 </body>
 

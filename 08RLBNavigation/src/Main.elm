@@ -29,8 +29,8 @@ type Page
     | LoginPage
 
 
-init : Navigation.Location -> ( Model, Cmd Msg )
-init location =
+init : Flags -> Navigation.Location -> ( Model, Cmd Msg )
+init flags location =
     let
         page =
             hashToPage location.hash
@@ -49,13 +49,16 @@ init location =
             , leaderBoard = leaderboardInitModel
             , runner = runnerInitModel
             , login = loginInitModel
-            , token = Nothing
-            , loggedIn = False
+            , token = flags.token
+            , loggedIn = flags.token /= Nothing
             }
 
         cmds =
             Cmd.batch
-                [ Cmd.map LeaderBoardMsg leaderboardCmd ]
+                [ Cmd.map LeaderBoardMsg leaderboardCmd
+                , Cmd.map LoginMsg loginCmd
+                , Cmd.map RunnerMsg runnerCmd
+                ]
     in
         ( initModel, cmds )
 
@@ -70,6 +73,7 @@ type Msg
     | LeaderBoardMsg LeaderBoard.Msg
     | RunnerMsg Runner.Msg
     | LoginMsg Login.Msg
+    | Logout
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -99,6 +103,14 @@ update msg model =
                 , Cmd.map RunnerMsg cmd
                 )
 
+        Logout ->
+            ( { model
+                | loggedIn = False
+                , token = Nothing
+              }
+            , deleteToken ()
+            )
+
         LoginMsg msg ->
             let
                 ( loginModel, cmd, token ) =
@@ -106,13 +118,24 @@ update msg model =
 
                 loggenIn =
                     token /= Nothing
+
+                saveTokenCmd =
+                    case token of
+                        Just jwt ->
+                            saveToken jwt
+
+                        Nothing ->
+                            Cmd.none
             in
                 ( { model
                     | login = loginModel
                     , token = token
                     , loggedIn = loggenIn
                   }
-                , Cmd.map LoginMsg cmd
+                , Cmd.batch
+                    [ Cmd.map LoginMsg cmd
+                    , saveTokenCmd
+                    ]
                 )
 
 
@@ -149,20 +172,25 @@ view model =
             ]
 
 
+authHeaderView : Model -> Html Msg
+authHeaderView model =
+    if model.loggedIn then
+        a [ onClick Logout ] [ text "Logout" ]
+    else
+        a [ onClick (Navigate LoginPage) ] [ text "Login" ]
+
+
 pageHeader : Model -> Html Msg
 pageHeader model =
     header []
-        [ a [ href "#/" ] [ text "Race Results" ]
+        [ a [ onClick (Navigate LeaderBoardPage) ] [ text "Race Result" ]
         , ul []
             [ li []
-                [ a [ href "#/runner" ] [ text "Add runner" ]
+                [ a [ onClick (Navigate RunnerPage) ] [ text "Add Runner" ]
                 ]
             ]
         , ul []
-            [ li []
-                [ a [ href "#/login" ] [ text "Login" ]
-                ]
-            ]
+            [ li [] [ authHeaderView model ] ]
         ]
 
 
@@ -222,11 +250,22 @@ locationToMsg location =
         |> ChangePage
 
 
-main : Program Never Model Msg
+type alias Flags =
+    { token : Maybe String
+    }
+
+
+main : Program Flags Model Msg
 main =
-    Navigation.program locationToMsg
+    Navigation.programWithFlags locationToMsg
         { init = init
         , update = update
         , view = view
         , subscriptions = subscriptions
         }
+
+
+port saveToken : String -> Cmd msg
+
+
+port deleteToken : () -> Cmd msg
