@@ -5,8 +5,8 @@ import Html.Attributes exposing (..)
 import Html.Events exposing (..)
 import Navigation
 import LeaderBoard
-import Runner
 import Login
+import Runner
 
 
 -- model
@@ -15,8 +15,8 @@ import Login
 type alias Model =
     { page : Page
     , leaderBoard : LeaderBoard.Model
-    , runner : Runner.Model
     , login : Login.Model
+    , runner : Runner.Model
     , token : Maybe String
     , loggedIn : Bool
     }
@@ -25,8 +25,8 @@ type alias Model =
 type Page
     = NotFound
     | LeaderBoardPage
-    | RunnerPage
     | LoginPage
+    | RunnerPage
 
 
 authPages : List Page
@@ -49,17 +49,17 @@ init flags location =
         ( leaderboardInitModel, leaderboardCmd ) =
             LeaderBoard.init
 
-        ( runnerInitModel, runnerCmd ) =
-            Runner.init
-
         ( loginInitModel, loginCmd ) =
             Login.init
+
+        ( runnerInitModel, runnerCmd ) =
+            Runner.init
 
         initModel =
             { page = updatedPage
             , leaderBoard = leaderboardInitModel
-            , runner = runnerInitModel
             , login = loginInitModel
+            , runner = runnerInitModel
             , token = flags.token
             , loggedIn = loggedIn
             }
@@ -83,8 +83,8 @@ type Msg
     = Navigate Page
     | ChangePage Page
     | LeaderBoardMsg LeaderBoard.Msg
-    | RunnerMsg Runner.Msg
     | LoginMsg Login.Msg
+    | RunnerMsg Runner.Msg
     | Logout
 
 
@@ -96,6 +96,7 @@ update msg model =
 
         ChangePage page ->
             let
+                -- Is page ok for user? or Redirect to login?
                 ( updatedPage, cmd ) =
                     authRedirect page model.loggedIn
             in
@@ -110,10 +111,40 @@ update msg model =
                 , Cmd.map LeaderBoardMsg cmd
                 )
 
+        LoginMsg msg ->
+            let
+                ( loginModel, cmd, token ) =
+                    Login.update msg model.login
+
+                loggedIn =
+                    token /= Nothing
+
+                saveTokenCmd =
+                    case token of
+                        Just jwt ->
+                            saveToken jwt
+
+                        Nothing ->
+                            Cmd.none
+            in
+                ( { model
+                    | login = loginModel
+                    , token = token
+                    , loggedIn = loggedIn
+                  }
+                , Cmd.batch
+                    [ Cmd.map LoginMsg cmd
+                    , saveTokenCmd
+                    ]
+                )
+
         RunnerMsg msg ->
             let
                 ( runnerModel, cmd ) =
-                    Runner.update msg model.runner
+                    Runner.update
+                        (Maybe.withDefault "" model.token)
+                        msg
+                        model.runner
             in
                 ( { model | runner = runnerModel }
                 , Cmd.map RunnerMsg cmd
@@ -129,33 +160,6 @@ update msg model =
                 , Navigation.modifyUrl <| pageToHash LeaderBoardPage
                 ]
             )
-
-        LoginMsg msg ->
-            let
-                ( loginModel, cmd, token ) =
-                    Login.update msg model.login
-
-                loggenIn =
-                    token /= Nothing
-
-                saveTokenCmd =
-                    case token of
-                        Just jwt ->
-                            saveToken jwt
-
-                        Nothing ->
-                            Cmd.none
-            in
-                ( { model
-                    | login = loginModel
-                    , token = token
-                    , loggedIn = loggenIn
-                  }
-                , Cmd.batch
-                    [ Cmd.map LoginMsg cmd
-                    , saveTokenCmd
-                    ]
-                )
 
 
 authForPage : Page -> Bool -> Bool
@@ -184,13 +188,13 @@ view model =
                     Html.map LeaderBoardMsg
                         (LeaderBoard.view model.leaderBoard)
 
-                RunnerPage ->
-                    Html.map RunnerMsg
-                        (Runner.view model.runner)
-
                 LoginPage ->
                     Html.map LoginMsg
                         (Login.view model.login)
+
+                RunnerPage ->
+                    Html.map RunnerMsg
+                        (Runner.view model.runner)
 
                 NotFound ->
                     div [ class "main" ]
@@ -207,22 +211,38 @@ view model =
 authHeaderView : Model -> Html Msg
 authHeaderView model =
     if model.loggedIn then
-        a [ onClick Logout ] [ text "Logout" ]
+        a [ onClick Logout ]
+            [ text "Logout"
+            ]
     else
-        a [ onClick (Navigate LoginPage) ] [ text "Login" ]
+        a [ onClick (Navigate LoginPage) ]
+            [ text "Login"
+            ]
+
+
+addRunnerLinkView : Model -> Html Msg
+addRunnerLinkView { loggedIn } =
+    if loggedIn then
+        a [ onClick (Navigate RunnerPage) ] [ text "Add Runner" ]
+    else
+        text ""
 
 
 pageHeader : Model -> Html Msg
 pageHeader model =
     header []
-        [ a [ onClick (Navigate LeaderBoardPage) ] [ text "Race Result" ]
+        [ a [ onClick (Navigate LeaderBoardPage) ]
+            [ text "Race Results" ]
         , ul []
             [ li []
-                [ a [ onClick (Navigate RunnerPage) ] [ text "Add Runner" ]
+                [ addRunnerLinkView model
                 ]
             ]
         , ul []
-            [ li [] [ authHeaderView model ] ]
+            [ li []
+                [ authHeaderView model
+                ]
+            ]
         ]
 
 
@@ -235,9 +255,18 @@ subscriptions model =
     let
         leaderBoardSub =
             LeaderBoard.subscriptions model.leaderBoard
+
+        loginSub =
+            Login.subscriptions model.login
+
+        runnerSub =
+            Runner.subscriptions model.runner
     in
         Sub.batch
-            [ Sub.map LeaderBoardMsg leaderBoardSub ]
+            [ Sub.map LeaderBoardMsg leaderBoardSub
+            , Sub.map LoginMsg loginSub
+            , Sub.map RunnerMsg runnerSub
+            ]
 
 
 hashToPage : String -> Page
@@ -249,11 +278,11 @@ hashToPage hash =
         "" ->
             LeaderBoardPage
 
-        "#/runner" ->
-            RunnerPage
-
         "#/login" ->
             LoginPage
+
+        "#/add" ->
+            RunnerPage
 
         _ ->
             NotFound
@@ -265,11 +294,11 @@ pageToHash page =
         LeaderBoardPage ->
             "#/"
 
-        RunnerPage ->
-            "#/runner"
-
         LoginPage ->
             "#/login"
+
+        RunnerPage ->
+            "#/add"
 
         NotFound ->
             "#notfound"
