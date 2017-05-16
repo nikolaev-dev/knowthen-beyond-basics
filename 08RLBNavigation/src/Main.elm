@@ -29,11 +29,22 @@ type Page
     | LoginPage
 
 
+authPages : List Page
+authPages =
+    [ RunnerPage ]
+
+
 init : Flags -> Navigation.Location -> ( Model, Cmd Msg )
 init flags location =
     let
         page =
             hashToPage location.hash
+
+        loggedIn =
+            flags.token /= Nothing
+
+        ( updatedPage, cmd ) =
+            authRedirect page loggedIn
 
         ( leaderboardInitModel, leaderboardCmd ) =
             LeaderBoard.init
@@ -45,12 +56,12 @@ init flags location =
             Login.init
 
         initModel =
-            { page = page
+            { page = updatedPage
             , leaderBoard = leaderboardInitModel
             , runner = runnerInitModel
             , login = loginInitModel
             , token = flags.token
-            , loggedIn = flags.token /= Nothing
+            , loggedIn = loggedIn
             }
 
         cmds =
@@ -58,6 +69,7 @@ init flags location =
                 [ Cmd.map LeaderBoardMsg leaderboardCmd
                 , Cmd.map LoginMsg loginCmd
                 , Cmd.map RunnerMsg runnerCmd
+                , cmd
                 ]
     in
         ( initModel, cmds )
@@ -80,10 +92,14 @@ update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
         Navigate page ->
-            ( { model | page = page }, Navigation.newUrl <| pageToHash page )
+            ( model, Navigation.newUrl <| pageToHash page )
 
         ChangePage page ->
-            ( { model | page = page }, Cmd.none )
+            let
+                ( updatedPage, cmd ) =
+                    authRedirect page model.loggedIn
+            in
+                ( { model | page = updatedPage }, cmd )
 
         LeaderBoardMsg msg ->
             let
@@ -108,7 +124,10 @@ update msg model =
                 | loggedIn = False
                 , token = Nothing
               }
-            , deleteToken ()
+            , Cmd.batch
+                [ deleteToken ()
+                , Navigation.modifyUrl <| pageToHash LeaderBoardPage
+                ]
             )
 
         LoginMsg msg ->
@@ -137,6 +156,19 @@ update msg model =
                     , saveTokenCmd
                     ]
                 )
+
+
+authForPage : Page -> Bool -> Bool
+authForPage page loggedIn =
+    loggedIn || not (List.member page authPages)
+
+
+authRedirect : Page -> Bool -> ( Page, Cmd Msg )
+authRedirect page loggedIn =
+    if authForPage page loggedIn then
+        ( page, Cmd.none )
+    else
+        ( LoginPage, Navigation.modifyUrl <| pageToHash LoginPage )
 
 
 
