@@ -3,9 +3,9 @@ port module Main exposing (..)
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
-import Navigation
 import LeaderBoard
 import Login
+import Navigation
 import Runner
 
 
@@ -72,7 +72,7 @@ init flags location =
                 , cmd
                 ]
     in
-        ( initModel, cmds )
+    ( initModel, cmds )
 
 
 
@@ -100,16 +100,16 @@ update msg model =
                 ( updatedPage, cmd ) =
                     authRedirect page model.loggedIn
             in
-                ( { model | page = updatedPage }, cmd )
+            ( { model | page = updatedPage }, cmd )
 
         LeaderBoardMsg msg ->
             let
                 ( leaderBoardModel, cmd ) =
                     LeaderBoard.update msg model.leaderBoard
             in
-                ( { model | leaderBoard = leaderBoardModel }
-                , Cmd.map LeaderBoardMsg cmd
-                )
+            ( { model | leaderBoard = leaderBoardModel }
+            , Cmd.map LeaderBoardMsg cmd
+            )
 
         LoginMsg msg ->
             let
@@ -127,16 +127,16 @@ update msg model =
                         Nothing ->
                             Cmd.none
             in
-                ( { model
-                    | login = loginModel
-                    , token = token
-                    , loggedIn = loggedIn
-                  }
-                , Cmd.batch
-                    [ Cmd.map LoginMsg cmd
-                    , saveTokenCmd
-                    ]
-                )
+            ( { model
+                | login = loginModel
+                , token = token
+                , loggedIn = loggedIn
+              }
+            , Cmd.batch
+                [ Cmd.map LoginMsg cmd
+                , saveTokenCmd
+                ]
+            )
 
         RunnerMsg msg ->
             let
@@ -146,9 +146,9 @@ update msg model =
                         msg
                         model.runner
             in
-                ( { model | runner = runnerModel }
-                , Cmd.map RunnerMsg cmd
-                )
+            ( { model | runner = runnerModel }
+            , Cmd.map RunnerMsg cmd
+            )
 
         Logout ->
             ( { model
@@ -202,10 +202,10 @@ view model =
                             [ text "Page Not Found!" ]
                         ]
     in
-        div []
-            [ pageHeader model
-            , page
-            ]
+    div []
+        [ pageHeader model
+        , page
+        ]
 
 
 authHeaderView : Model -> Html Msg
@@ -262,11 +262,11 @@ subscriptions model =
         runnerSub =
             Runner.subscriptions model.runner
     in
-        Sub.batch
-            [ Sub.map LeaderBoardMsg leaderBoardSub
-            , Sub.map LoginMsg loginSub
-            , Sub.map RunnerMsg runnerSub
-            ]
+    Sub.batch
+        [ Sub.map LeaderBoardMsg leaderBoardSub
+        , Sub.map LoginMsg loginSub
+        , Sub.map RunnerMsg runnerSub
+        ]
 
 
 hashToPage : String -> Page
